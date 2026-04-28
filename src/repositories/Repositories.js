@@ -9,7 +9,7 @@ import { Venta }           from '../models/Venta.js';
  */
 export class ProductoRepository extends BaseRepository {
   constructor(api) {
-    super(api, 'productos', Producto);
+    super(api, 'producto', Producto);
   }
 
   /**
@@ -28,7 +28,7 @@ export class ProductoRepository extends BaseRepository {
  */
 export class VentaRepository extends BaseRepository {
   constructor(api) {
-    super(api, 'ventas', Venta);
+    super(api, 'venta', Venta);
   }
 
   /**
