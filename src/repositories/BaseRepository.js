@@ -7,22 +7,13 @@
 export class BaseRepository {
   /**
    * @param {import('../services/ApiService.js').ApiService} api
-   * @param {string} entity - nombre de la entidad ('ventas' | 'productos')
+   * @param {string} entity - nombre de la entidad ('venta' | 'producto')
    * @param {Function} ModelClass - constructor del modelo
    */
   constructor(api, entity, ModelClass) {
     this.api        = api;
     this.entity     = entity;
     this.ModelClass = ModelClass;
-  }
-
-  /**
-   * Obtiene todos los registros.
-   * @returns {Promise<BaseModel[]>}
-   */
-  async getAll() {
-    const data = await this.api.get({ action: `get${this._cap()}` });
-    return (Array.isArray(data) ? data : []).map(d => new this.ModelClass(d));
   }
 
   /**
