@@ -61,14 +61,15 @@ async registrar(cabecera, items) {
     const porProducto   = this._agrupar(ventas, v => v.producto, v => v.cantidad);
     const porCliente    = this._agrupar(ventas, v => v.cliente, v => v.total);
     const porDia        = this._porDia(ventas, 14);
-    return { totalVendido, totalUnidades, clientes, hoyTotal, porLocal, porProducto, porCliente, porDia };
+    const totalComision = totalVendido * 0.06;
+    return { totalVendido, totalUnidades, clientes, hoyTotal, totalComision, porLocal, porProducto, porCliente, porDia };
   }
 
   _statsVacias() {
-    return { totalVendido: 0, totalUnidades: 0, clientes: 0, hoyTotal: 0,
-             porLocal: [], porProducto: [], porCliente: [], porDia: [] };
+    return { totalVendido: 0, totalUnidades: 0, clientes: 0, hoyTotal: 0, totalComision: 0,
+         porLocal: [], porProducto: [], porCliente: [], porDia: [] };
   }
-
+  
   _agrupar(ventas, keyFn, valFn) {
     const map = {};
     ventas.forEach(v => { const k = keyFn(v); map[k] = (map[k] || 0) + valFn(v); });

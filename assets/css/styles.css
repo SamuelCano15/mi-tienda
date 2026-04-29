@@ -383,6 +383,70 @@ select {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ─── Tickets en Historial ───────────────────────────────────── */
+.ticket-card {
+  background: var(--surface);
+  border: 1px solid var(--border-m);
+  border-radius: var(--radius-l);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.ticket-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.ticket-card__cliente {
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ticket-card__items {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-bottom: 8px;
+}
+
+.ticket-card__row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-2);
+  padding: 3px 0;
+}
+
+.ticket-card__footer {
+  border-top: 2px solid var(--border-m);
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.ticket-card__total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.ticket-card__comision {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 10px;
+  background: var(--green-l);
+  border-radius: var(--radius);
+  color: var(--green);
+}
+
 /* ─── Responsive ────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .form-row  { grid-template-columns: 1fr; }

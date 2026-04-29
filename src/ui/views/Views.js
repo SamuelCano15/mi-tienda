@@ -136,8 +136,10 @@ export class VentaView extends BaseView {
       container.innerHTML = '<p class="empty" style="padding:12px 0">Sin productos aún</p>';
       return;
     }
-    const fmt = v => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
+    const fmt   = v => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
     const total = this._items.reduce((s, i) => s + i.total, 0);
+    const comision = total * 0.06;
+
     container.innerHTML = `
       ${this._items.map((item, idx) => `
         <div class="list-item">
@@ -157,8 +159,12 @@ export class VentaView extends BaseView {
         <span style="font-weight:600; font-size:14px;">Total</span>
         <span class="list-item__price" style="font-size:16px;">${fmt(total)}</span>
       </div>
+      <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:8px; padding:8px 12px; background:var(--green-l); border-radius:var(--radius);">
+        <span style="color:var(--green); font-weight:500;">Comisión papá (6%)</span>
+        <span style="color:var(--green); font-weight:600;">${fmt(comision)}</span>
+      </div>
     `;
-    // bind quitar item
+
     container.querySelectorAll('[data-remove]').forEach(btn => {
       btn.addEventListener('click', () => {
         this._items.splice(parseInt(btn.dataset.remove), 1);
@@ -198,14 +204,13 @@ export class HistorialView extends BaseView {
     if (!list) return;
     if (!ventas.length) { this._empty('lista-ventas', 'Sin ventas en este periodo.'); return; }
 
-    // Agrupar por ventaId (campo id)
     const grupos = {};
     ventas.forEach(v => {
       if (!grupos[v.id]) grupos[v.id] = { ...v, items: [] };
       grupos[v.id].items.push(v);
     });
 
-    const fmt    = v => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
+    const fmt = v => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
     const fmtFecha = f => {
       if (!f) return '';
       const d = new Date(f);
@@ -214,11 +219,12 @@ export class HistorialView extends BaseView {
 
     list.innerHTML = Object.values(grupos).map(g => {
       const totalGrupo = g.items.reduce((s, i) => s + i.total, 0);
+      const comision   = totalGrupo * 0.06;
       return `
-        <div class="list-item ticket" data-id="${g.id}" style="flex-direction:column; align-items:stretch; gap:8px;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="ticket-card">
+          <div class="ticket-card__header">
             <div>
-              <span class="list-item__title">${g.cliente}
+              <span class="ticket-card__cliente">${g.cliente}
                 ${g.local ? `<span class="chip chip--local">${g.local}</span>` : ''}
               </span>
               <div class="list-item__sub">${fmtFecha(g.fecha)}</div>
@@ -227,16 +233,22 @@ export class HistorialView extends BaseView {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
             </button>
           </div>
-          <div style="border-top:1px solid var(--border); padding-top:8px;">
+          <div class="ticket-card__items">
             ${g.items.map(i => `
-              <div style="display:flex; justify-content:space-between; font-size:13px; padding:3px 0;">
-                <span style="color:var(--text-2)">${i.producto} × ${i.cantidad}</span>
-                <span style="font-weight:500;">${fmt(i.total)}</span>
+              <div class="ticket-card__row">
+                <span>${i.producto} × ${i.cantidad}</span>
+                <span>${fmt(i.total)}</span>
               </div>
             `).join('')}
-            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:600; border-top:1px solid var(--border-m); margin-top:6px; padding-top:6px;">
+          </div>
+          <div class="ticket-card__footer">
+            <div class="ticket-card__total">
               <span>Total</span>
-              <span class="list-item__price">${fmt(totalGrupo)}</span>
+              <span>${fmt(totalGrupo)}</span>
+            </div>
+            <div class="ticket-card__comision">
+              <span>Comisión (6%)</span>
+              <span>${fmt(comision)}</span>
             </div>
           </div>
         </div>
@@ -255,8 +267,16 @@ export class HistorialView extends BaseView {
     document.getElementById('filtro-periodo')?.addEventListener('change', e => handler(e.target.value));
   }
 
+  bindBusqueda(handler) {
+    document.getElementById('busqueda-cliente')?.addEventListener('input', e => handler(e.target.value.trim().toLowerCase()));
+  }
+
   getFiltro() {
     return document.getElementById('filtro-periodo')?.value || 'todos';
+  }
+
+  getBusqueda() {
+    return document.getElementById('busqueda-cliente')?.value.trim().toLowerCase() || '';
   }
 }
 
@@ -276,12 +296,13 @@ export class StatsView extends BaseView {
     this.chart.render(document.getElementById('chart-clientes'),  stats.porCliente,  { formatter: fmt });
   }
 
-  _renderMetricas({ totalVendido, totalUnidades, clientes, hoyTotal }) {
+  _renderMetricas({ totalVendido, totalUnidades, clientes, hoyTotal, totalComision }) {
     const fmt = v => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    const set  = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
     set('stat-total',    fmt(totalVendido));
     set('stat-hoy',      fmt(hoyTotal));
     set('stat-clientes', clientes);
     set('stat-unidades', totalUnidades);
+    set('stat-comision', fmt(totalComision));
   }
 }

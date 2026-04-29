@@ -17,6 +17,7 @@ export class App {
     this._productos = [];
     this._ventas    = [];
     this._filtro    = 'todos';
+    this._busqueda  = '';
   }
 
   async init() {
@@ -126,6 +127,7 @@ export class App {
   /* ── Historial ─────────────────────────────────────────────── */
   _bindHistorialHandlers() {
     this.historialView.bindFiltro(filtro => { this._filtro = filtro; this._renderHistorialFiltrado(); });
+    this.historialView.bindBusqueda(q => { this._busqueda = q; this._renderHistorialFiltrado(); });
     this.historialView.bindDeleteVenta(id => this._onEliminarVenta(id));
   }
 
@@ -135,14 +137,14 @@ export class App {
   }
 
   _filtrarVentas(periodo) {
-    if (periodo === 'todos') return this._ventas;
+    let resultado = this._ventas;
     const hoy   = new Date().toISOString().slice(0, 10);
     const desde = new Date();
-    if (periodo === 'hoy')    return this._ventas.filter(v => v.fecha === hoy);
-    if (periodo === 'semana') desde.setDate(desde.getDate() - 7);
-    if (periodo === 'mes')    desde.setDate(desde.getDate() - 30);
-    const desdeStr = desde.toISOString().slice(0, 10);
-    return this._ventas.filter(v => v.fecha >= desdeStr);
+    if (periodo === 'hoy')    resultado = resultado.filter(v => v.fecha === hoy);
+    if (periodo === 'semana') { desde.setDate(desde.getDate() - 7); resultado = resultado.filter(v => v.fecha >= desde.toISOString().slice(0, 10)); }
+    if (periodo === 'mes')    { desde.setDate(desde.getDate() - 30); resultado = resultado.filter(v => v.fecha >= desde.toISOString().slice(0, 10)); }
+    if (this._busqueda) resultado = resultado.filter(v => v.cliente.toLowerCase().includes(this._busqueda));
+    return resultado;
   }
 
   async _onEliminarVenta(ventaId) {
