@@ -8,7 +8,7 @@ import { BaseModel } from './BaseModel.js';
 export class Producto extends BaseModel {
   constructor(data = {}) {
     super(data);
-    this.nombre    = (data.nombre    || '').trim();
+    this.nombre = String(data.nombre || '').trim();
     this.precio    = parseFloat(data.precio)  || 0;
     this.categoria = (data.categoria || data.cat || '').trim();
   }
