@@ -15,6 +15,7 @@ export class Venta extends BaseModel {
     this.precio   = parseFloat(data.precio)   || 0;
     this.cantidad = parseInt(data.cantidad, 10)|| 1;
     this.total    = parseFloat(data.total)     || this.precio * this.cantidad;
+    this.estado   = data.estado   || 'Despachado';
   }
 
   get totalFormateado() {
@@ -54,6 +55,7 @@ export class Venta extends BaseModel {
       precio:    this.precio,
       cantidad:  this.cantidad,
       total:     this.total,
+      estado:    this.estado,
     };
   }
 }
