@@ -7,8 +7,12 @@ export class ProductoService {
   async listar() { return this.repo.getAll(); }
 
   async agregar(data) {
-    const producto = new Producto(data);
-    const errors   = producto.validate();
+    const producto = new Producto({
+      ...data,
+      nombre:    (data.nombre    || '').trim().toLowerCase(),
+      categoria: (data.categoria || '').trim().toLowerCase(),
+    });
+    const errors = producto.validate();
     if (errors.length) return { ok: false, errors };
     await this.repo.save(producto);
     return { ok: true };
@@ -39,15 +43,18 @@ async registrar(cabecera, items) {
     for (const item of items) {
       const venta = new Venta({
         ...cabecera,
+        cliente:  cabecera.cliente.trim().toLowerCase(),
+        local:    (cabecera.local || '').trim().toLowerCase(),
+        producto: item.producto.trim().toLowerCase(),
         ...item,
-        id: ventaId,      // mismo id para todos
-        ventaId: ventaId, // se envía al Apps Script
+        id:       ventaId,
+        ventaId:  ventaId,
       });
       await this.repo.save(venta);
     }
     return { ok: true };
   }
-
+  
   async eliminar(ventaId) { return this.repo.deleteByVentaId(ventaId); }
 
   async actualizarEstado(ventaId, estado) {
