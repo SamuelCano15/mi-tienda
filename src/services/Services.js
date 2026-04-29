@@ -50,6 +50,9 @@ async registrar(cabecera, items) {
 
   async eliminar(ventaId) { return this.repo.deleteByVentaId(ventaId); }
 
+  async actualizarEstado(ventaId, estado) {
+  return this.repo.updateEstado(ventaId, estado); }
+
   calcularStats(ventas) {
     if (!ventas.length) return this._statsVacias();
     const totalVendido  = ventas.reduce((s, v) => s + v.total, 0);
@@ -69,7 +72,7 @@ async registrar(cabecera, items) {
     return { totalVendido: 0, totalUnidades: 0, clientes: 0, hoyTotal: 0, totalComision: 0,
          porLocal: [], porProducto: [], porCliente: [], porDia: [] };
   }
-  
+
   _agrupar(ventas, keyFn, valFn) {
     const map = {};
     ventas.forEach(v => { const k = keyFn(v); map[k] = (map[k] || 0) + valFn(v); });

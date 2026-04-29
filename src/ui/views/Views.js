@@ -250,6 +250,13 @@ export class HistorialView extends BaseView {
               <span>Comisión (6%)</span>
               <span>${fmt(comision)}</span>
             </div>
+            <div class="ticket-card__estado">
+              <select class="estado-select" data-venta-id="${g.id}">
+                <option value="Despachado" ${(g.estado||'Despachado')==='Despachado'?'selected':''}>📦 Despachado</option>
+                <option value="Entregado"  ${(g.estado||'')==='Entregado' ?'selected':''}>✅ Entregado</option>
+                <option value="Cancelado"  ${(g.estado||'')==='Cancelado' ?'selected':''}>❌ Cancelado</option>
+              </select>
+            </div>
           </div>
         </div>
       `;
@@ -271,12 +278,27 @@ export class HistorialView extends BaseView {
     document.getElementById('busqueda-cliente')?.addEventListener('input', e => handler(e.target.value.trim().toLowerCase()));
   }
 
+  bindFiltroEstado(handler) {
+    document.getElementById('filtro-estado')?.addEventListener('change', e => handler(e.target.value));
+  }
+
+  getFiltroEstado() {
+    return document.getElementById('filtro-estado')?.value || 'todos';
+  }
+
   getFiltro() {
     return document.getElementById('filtro-periodo')?.value || 'todos';
   }
 
   getBusqueda() {
     return document.getElementById('busqueda-cliente')?.value.trim().toLowerCase() || '';
+  }
+
+  bindEstado(handler) {
+    document.getElementById('lista-ventas')?.addEventListener('change', e => {
+      const sel = e.target.closest('.estado-select');
+      if (sel) handler(sel.dataset.ventaId, sel.value);
+    });
   }
 }
 

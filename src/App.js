@@ -18,6 +18,7 @@ export class App {
     this._ventas    = [];
     this._filtro    = 'todos';
     this._busqueda  = '';
+    this._estado   = 'todos';
   }
 
   async init() {
@@ -128,6 +129,8 @@ export class App {
   _bindHistorialHandlers() {
     this.historialView.bindFiltro(filtro => { this._filtro = filtro; this._renderHistorialFiltrado(); });
     this.historialView.bindBusqueda(q => { this._busqueda = q; this._renderHistorialFiltrado(); });
+    this.historialView.bindFiltroEstado(estado => { this._estado = estado; this._renderHistorialFiltrado(); });
+    this.historialView.bindEstado((id, estado) => this._onActualizarEstado(id, estado));
     this.historialView.bindDeleteVenta(id => this._onEliminarVenta(id));
   }
 
@@ -144,6 +147,7 @@ export class App {
     if (periodo === 'semana') { desde.setDate(desde.getDate() - 7); resultado = resultado.filter(v => v.fecha >= desde.toISOString().slice(0, 10)); }
     if (periodo === 'mes')    { desde.setDate(desde.getDate() - 30); resultado = resultado.filter(v => v.fecha >= desde.toISOString().slice(0, 10)); }
     if (this._busqueda) resultado = resultado.filter(v => v.cliente.toLowerCase().includes(this._busqueda));
+    if (this._estado !== 'todos') resultado = resultado.filter(v => (v.estado || 'Despachado') === this._estado);
     return resultado;
   }
 
@@ -155,6 +159,15 @@ export class App {
       this.toast.success('Venta eliminada.');
       await this._loadVentas();
     } catch { this.toast.error('Error eliminando la venta.'); }
+  }
+
+  async _onActualizarEstado(ventaId, estado) {
+    try {
+      await this.ventaService.actualizarEstado(ventaId, estado);
+      this.toast.success('Estado actualizado.');
+    } catch {
+      this.toast.error('Error actualizando el estado.');
+    }
   }
 
   /* ── Helpers ───────────────────────────────────────────────── */

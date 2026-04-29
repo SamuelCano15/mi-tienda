@@ -447,6 +447,36 @@ select {
   color: var(--green);
 }
 
+.ticket-card__estado {
+  margin-top: 10px;
+}
+
+.ticket-card__estado .estado-select {
+  width: 100%;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 32px 7px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-m);
+  background-color: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.estado-select[value="Entregado"],
+.estado-select option[value="Entregado"]:checked {
+  background: var(--green-l);
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.estado-select[value="Cancelado"],
+.estado-select option[value="Cancelado"]:checked {
+  background: var(--red-l);
+  color: var(--red);
+  border-color: var(--red);
+}
+
 /* ─── Responsive ────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .form-row  { grid-template-columns: 1fr; }

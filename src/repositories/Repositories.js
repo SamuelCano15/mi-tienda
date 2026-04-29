@@ -24,12 +24,19 @@ export class VentaRepository extends BaseRepository {
 
   async getAll() {
     const data = await this.api.get({ action: 'getVentas' });
-    return (Array.isArray(data) ? data : []).map(d => new this.ModelClass(d));
+    return (Array.isArray(data) ? data : []).map(d => ({
+      ...d,
+      estado: d.estado || 'Despachado'
+    })).map(d => new this.ModelClass(d));
   }
 
   async getByRango(desde, hasta) {
     const todas = await this.getAll();
     return todas.filter(v => v.fecha >= desde && v.fecha <= hasta);
+  }
+
+  async updateEstado(ventaId, estado) {
+    return this.api.get({ action: 'updateEstado', id: ventaId, estado });
   }
 
   /**

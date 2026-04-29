@@ -110,26 +110,34 @@
   </section>
 
   <!-- Panel: Historial -->
-    <section id="panel-historial" class="panel" role="tabpanel" aria-label="Historial de ventas">
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <p class="card__title" style="margin:0">Ventas registradas</p>
-          <select id="filtro-periodo" style="width:auto; font-size:13px; padding:6px 28px 6px 10px;">
-            <option value="todos">Todas</option>
-            <option value="hoy">Hoy</option>
-            <option value="semana">Esta semana</option>
-            <option value="mes">Este mes</option>
-          </select>
-        </div>
-        <div class="form-group" style="margin-bottom:16px;">
-          <input type="text" id="busqueda-cliente" placeholder="🔍 Buscar por cliente…" style="font-size:13px;">
-        </div>
-        <div id="lista-ventas">
-          <div class="loader"><span class="loader__ring"></span><span>Cargando…</span></div>
-        </div>
+  <section id="panel-historial" class="panel" role="tabpanel" aria-label="Historial de ventas">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <p class="card__title" style="margin:0">Ventas registradas</p>
+        <select id="filtro-periodo" style="width:auto; font-size:13px; padding:6px 28px 6px 10px;">
+          <option value="todos">Todas</option>
+          <option value="hoy">Hoy</option>
+          <option value="semana">Esta semana</option>
+          <option value="mes">Este mes</option>
+        </select>
       </div>
-    </section>
-    
+      <div class="form-group" style="margin-bottom:12px;">
+        <input type="text" id="busqueda-cliente" placeholder="🔍 Buscar por cliente…" style="font-size:13px;">
+      </div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <select id="filtro-estado" style="font-size:13px;">
+          <option value="todos">Todos los estados</option>
+          <option value="Despachado">📦 Despachado</option>
+          <option value="Entregado">✅ Entregado</option>
+          <option value="Cancelado">❌ Cancelado</option>
+        </select>
+      </div>
+      <div id="lista-ventas">
+        <div class="loader"><span class="loader__ring"></span><span>Cargando…</span></div>
+      </div>
+    </div>
+  </section>
+
   <!-- Panel: Estadísticas -->
   <section id="panel-stats" class="panel" role="tabpanel" aria-label="Estadísticas">
 
