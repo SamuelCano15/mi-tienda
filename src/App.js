@@ -164,6 +164,10 @@ export class App {
   async _onActualizarEstado(ventaId, estado) {
     try {
       await this.ventaService.actualizarEstado(ventaId, estado);
+      // actualizar en memoria para que no se resetee al filtrar
+      this._ventas.forEach(v => {
+        if (v.id === ventaId) v.estado = estado;
+      });
       this.toast.success('Estado actualizado.');
     } catch {
       this.toast.error('Error actualizando el estado.');
