@@ -364,6 +364,23 @@ select {
 
 .section-spacer { margin-bottom: 8px; }
 
+/* ─── Btn secondary ─────────────────────────────────────────── */
+.btn-secondary {
+  width: 100%;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-b);
+  color: var(--accent);
+  background: var(--accent-l);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  cursor: pointer;
+  margin-top: 12px;
+  transition: background .15s;
+}
+.btn-secondary:hover { background: #f5d5c8; }
+
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ─── Responsive ────────────────────────────────────────────── */

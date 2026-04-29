@@ -1,28 +1,16 @@
 import { FormHelper, BarChart } from '../components/Components.js';
 
-/**
- * BaseView
- * Clase base para todas las vistas.
- * SRP: cada vista gestiona solo su propio panel del DOM.
- * OCP: se extiende para cada sección sin modificar la base.
- */
 export class BaseView {
-  /**
-   * @param {string} panelId - id del panel DOM de esta vista
-   * @param {Object} deps    - dependencias inyectadas (toast, modal, etc.)
-   */
   constructor(panelId, deps = {}) {
     this.panel = document.getElementById(panelId);
     this.deps  = deps;
   }
 
-  /** Limpia el contenido de un contenedor y muestra mensaje vacío. */
   _empty(containerId, msg = 'Sin registros aún') {
     const el = document.getElementById(containerId);
     if (el) el.innerHTML = `<p class="empty">${msg}</p>`;
   }
 
-  /** Muestra el spinner dentro de un contenedor. */
   _loading(containerId) {
     const el = document.getElementById(containerId);
     if (el) el.innerHTML = '<div class="loader"><span class="loader__ring"></span></div>';
@@ -37,7 +25,6 @@ export class CatalogoView extends BaseView {
     const list = document.getElementById('lista-productos');
     if (!list) return;
     if (!productos.length) { this._empty('lista-productos', 'Sin productos. Agrega el primero.'); return; }
-
     list.innerHTML = productos.map(p => `
       <div class="list-item" data-nombre="${p.nombre}">
         <div class="list-item__info">
@@ -73,14 +60,15 @@ export class CatalogoView extends BaseView {
     };
   }
 
-  clearForm() {
-    FormHelper.clear(['p-nombre', 'p-precio', 'p-cat']);
-  }
+  clearForm() { FormHelper.clear(['p-nombre', 'p-precio', 'p-cat']); }
 }
 
 /* ─── VentaView ──────────────────────────────────────────────── */
 export class VentaView extends BaseView {
-  constructor(deps) { super('panel-ventas', deps); }
+  constructor(deps) {
+    super('panel-ventas', deps);
+    this._items = []; // lista temporal de productos en la venta actual
+  }
 
   fillProductos(productos) {
     FormHelper.fillSelect('v-producto', productos,
@@ -93,44 +81,106 @@ export class VentaView extends BaseView {
     document.getElementById('v-producto')?.addEventListener('change', e => {
       const prod = productos.find(p => p.nombre === e.target.value);
       if (prod) {
-        const precioEl   = document.getElementById('v-precio');
-        const cantidadEl = document.getElementById('v-cantidad');
-        precioEl.value   = prod.precio;
+        document.getElementById('v-precio').value = prod.precio;
         this._calcTotal();
       }
     });
-    document.getElementById('v-precio')?.addEventListener('input',    () => this._calcTotal());
-    document.getElementById('v-cantidad')?.addEventListener('input',  () => this._calcTotal());
+    document.getElementById('v-precio')?.addEventListener('input',   () => this._calcTotal());
+    document.getElementById('v-cantidad')?.addEventListener('input', () => this._calcTotal());
   }
 
   _calcTotal() {
-    const precio   = parseFloat(document.getElementById('v-precio')?.value)   || 0;
-    const cantidad = parseInt(document.getElementById('v-cantidad')?.value, 10)|| 0;
-    const totalEl  = document.getElementById('v-total');
+    const precio   = parseFloat(document.getElementById('v-precio')?.value)    || 0;
+    const cantidad = parseInt(document.getElementById('v-cantidad')?.value, 10) || 0;
+    const totalEl  = document.getElementById('v-subtotal');
     if (totalEl) totalEl.value = (precio * cantidad).toFixed(0);
+  }
+
+  bindAgregarItem(handler) {
+    document.getElementById('btn-agregar-item')?.addEventListener('click', handler);
   }
 
   bindRegistrarVenta(handler) {
     document.getElementById('btn-registrar-venta')?.addEventListener('click', handler);
   }
 
-  getFormData() {
+  getItemData() {
     return {
-      fecha:    document.getElementById('v-fecha')?.value,
-      cliente:  document.getElementById('v-cliente')?.value.trim(),
-      local:    document.getElementById('v-local')?.value.trim(),
       producto: document.getElementById('v-producto')?.value,
-      precio:   document.getElementById('v-precio')?.value,
-      cantidad: document.getElementById('v-cantidad')?.value,
-      total:    document.getElementById('v-total')?.value,
+      precio:   parseFloat(document.getElementById('v-precio')?.value)    || 0,
+      cantidad: parseInt(document.getElementById('v-cantidad')?.value, 10) || 1,
+      total:    parseFloat(document.getElementById('v-subtotal')?.value)   || 0,
     };
+  }
+
+  getCabecera() {
+    return {
+      fecha:   document.getElementById('v-fecha')?.value,
+      cliente: document.getElementById('v-cliente')?.value.trim(),
+      local:   document.getElementById('v-local')?.value.trim(),
+    };
+  }
+
+  addItem(item) {
+    this._items.push(item);
+    this._renderItems();
+    this._clearItemForm();
+  }
+
+  getItems() { return this._items; }
+
+  _renderItems() {
+    const container = document.getElementById('v-items-list');
+    if (!container) return;
+    if (!this._items.length) {
+      container.innerHTML = '<p class="empty" style="padding:12px 0">Sin productos aún</p>';
+      return;
+    }
+    const fmt = v => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
+    const total = this._items.reduce((s, i) => s + i.total, 0);
+    container.innerHTML = `
+      ${this._items.map((item, idx) => `
+        <div class="list-item">
+          <div class="list-item__info">
+            <span class="list-item__title">${item.producto}</span>
+            <span class="list-item__sub">${fmt(item.precio)} × ${item.cantidad}</span>
+          </div>
+          <div class="list-item__actions">
+            <span class="list-item__price">${fmt(item.total)}</span>
+            <button class="btn-icon btn-icon--danger" data-remove="${idx}" aria-label="Quitar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div>
+        </div>
+      `).join('')}
+      <div class="list-item" style="border-top: 2px solid var(--border-m); margin-top:4px;">
+        <span style="font-weight:600; font-size:14px;">Total</span>
+        <span class="list-item__price" style="font-size:16px;">${fmt(total)}</span>
+      </div>
+    `;
+    // bind quitar item
+    container.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this._items.splice(parseInt(btn.dataset.remove), 1);
+        this._renderItems();
+      });
+    });
+  }
+
+  _clearItemForm() {
+    document.getElementById('v-producto').value  = '';
+    document.getElementById('v-precio').value    = '';
+    document.getElementById('v-cantidad').value  = '1';
+    document.getElementById('v-subtotal').value  = '';
   }
 
   clearForm() {
     const today = new Date().toISOString().slice(0, 10);
-    FormHelper.clear(['v-cliente', 'v-local', 'v-producto', 'v-precio', 'v-total']);
-    document.getElementById('v-cantidad').value = '1';
-    document.getElementById('v-fecha').value    = today;
+    FormHelper.clear(['v-cliente', 'v-local']);
+    document.getElementById('v-fecha').value = today;
+    this._items = [];
+    this._renderItems();
+    this._clearItemForm();
   }
 
   setToday() {
@@ -148,22 +198,50 @@ export class HistorialView extends BaseView {
     if (!list) return;
     if (!ventas.length) { this._empty('lista-ventas', 'Sin ventas en este periodo.'); return; }
 
-    list.innerHTML = ventas.map(v => `
-      <div class="list-item" data-id="${v.id}">
-        <div class="list-item__info">
-          <span class="list-item__title">${v.cliente}
-            ${v.local ? `<span class="chip chip--local">${v.local}</span>` : ''}
-          </span>
-          <span class="list-item__sub">${v.fecha} · ${v.producto} × ${v.cantidad}</span>
+    // Agrupar por ventaId (campo id)
+    const grupos = {};
+    ventas.forEach(v => {
+      if (!grupos[v.id]) grupos[v.id] = { ...v, items: [] };
+      grupos[v.id].items.push(v);
+    });
+
+    const fmt    = v => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
+    const fmtFecha = f => {
+      if (!f) return '';
+      const d = new Date(f);
+      return isNaN(d) ? f : `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    };
+
+    list.innerHTML = Object.values(grupos).map(g => {
+      const totalGrupo = g.items.reduce((s, i) => s + i.total, 0);
+      return `
+        <div class="list-item ticket" data-id="${g.id}" style="flex-direction:column; align-items:stretch; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span class="list-item__title">${g.cliente}
+                ${g.local ? `<span class="chip chip--local">${g.local}</span>` : ''}
+              </span>
+              <div class="list-item__sub">${fmtFecha(g.fecha)}</div>
+            </div>
+            <button class="btn-icon btn-icon--danger" data-delete="${g.id}" aria-label="Eliminar venta">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div>
+          <div style="border-top:1px solid var(--border); padding-top:8px;">
+            ${g.items.map(i => `
+              <div style="display:flex; justify-content:space-between; font-size:13px; padding:3px 0;">
+                <span style="color:var(--text-2)">${i.producto} × ${i.cantidad}</span>
+                <span style="font-weight:500;">${fmt(i.total)}</span>
+              </div>
+            `).join('')}
+            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:600; border-top:1px solid var(--border-m); margin-top:6px; padding-top:6px;">
+              <span>Total</span>
+              <span class="list-item__price">${fmt(totalGrupo)}</span>
+            </div>
+          </div>
         </div>
-        <div class="list-item__actions">
-          <span class="list-item__price">${v.totalFormateado}</span>
-          <button class="btn-icon btn-icon--danger" data-delete="${v.id}" aria-label="Eliminar venta">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-          </button>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   bindDeleteVenta(handler) {
@@ -191,31 +269,16 @@ export class StatsView extends BaseView {
 
   render(stats) {
     this._renderMetricas(stats);
-    this.chart.render(
-      document.getElementById('chart-locales'),
-      stats.porLocal,
-      { formatter: v => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v) }
-    );
-    this.chart.render(
-      document.getElementById('chart-productos'),
-      stats.porProducto,
-      { unit: ' uds' }
-    );
-    this.chart.render(
-      document.getElementById('chart-dias'),
-      stats.porDia,
-      { formatter: v => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v) }
-    );
-    this.chart.render(
-      document.getElementById('chart-clientes'),
-      stats.porCliente,
-      { formatter: v => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v) }
-    );
+    const fmt = v => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
+    this.chart.render(document.getElementById('chart-locales'),   stats.porLocal,    { formatter: fmt });
+    this.chart.render(document.getElementById('chart-productos'), stats.porProducto, { unit: ' uds' });
+    this.chart.render(document.getElementById('chart-dias'),      stats.porDia,      { formatter: fmt });
+    this.chart.render(document.getElementById('chart-clientes'),  stats.porCliente,  { formatter: fmt });
   }
 
   _renderMetricas({ totalVendido, totalUnidades, clientes, hoyTotal }) {
     const fmt = v => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
-    const set  = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
     set('stat-total',    fmt(totalVendido));
     set('stat-hoy',      fmt(hoyTotal));
     set('stat-clientes', clientes);

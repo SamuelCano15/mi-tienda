@@ -29,8 +29,7 @@
   <!-- Panel: Registrar venta -->
   <section id="panel-ventas" class="panel panel--active" role="tabpanel" aria-label="Registrar venta">
     <div class="card">
-      <p class="card__title">Nueva venta</p>
-
+      <p class="card__title">Datos de la venta</p>
       <div class="form-row">
         <div class="form-group">
           <label for="v-fecha">Fecha</label>
@@ -41,20 +40,21 @@
           <input type="text" id="v-local" placeholder="Ej: Centro, Laureles…">
         </div>
       </div>
-
       <div class="form-group section-spacer">
         <label for="v-cliente">Nombre del cliente</label>
         <input type="text" id="v-cliente" placeholder="Nombre completo" autocomplete="off">
       </div>
+    </div>
 
-      <div class="form-group section-spacer">
+    <div class="card">
+      <p class="card__title">Agregar producto</p>
+      <div class="form-group">
         <label for="v-producto">Producto</label>
         <select id="v-producto">
           <option value="">— Seleccionar —</option>
         </select>
       </div>
-
-      <div class="form-row3 section-spacer">
+      <div class="form-row section-spacer">
         <div class="form-group">
           <label for="v-precio">Precio / ud ($)</label>
           <input type="number" id="v-precio" min="0" step="100" placeholder="0">
@@ -63,12 +63,19 @@
           <label for="v-cantidad">Cantidad</label>
           <input type="number" id="v-cantidad" min="1" value="1">
         </div>
-        <div class="form-group">
-          <label for="v-total">Total ($)</label>
-          <input type="number" id="v-total" readonly placeholder="0">
-        </div>
       </div>
+      <div class="form-group section-spacer">
+        <label for="v-subtotal">Subtotal ($)</label>
+        <input type="number" id="v-subtotal" readonly placeholder="0">
+      </div>
+      <button class="btn-secondary" id="btn-agregar-item">+ Agregar producto</button>
+    </div>
 
+    <div class="card">
+      <p class="card__title">Productos en esta venta</p>
+      <div id="v-items-list">
+        <p class="empty" style="padding:12px 0">Sin productos aún</p>
+      </div>
       <button class="btn-primary" id="btn-registrar-venta">Guardar venta</button>
     </div>
   </section>
@@ -101,7 +108,7 @@
       </div>
     </div>
   </section>
-
+  
   <!-- Panel: Historial -->
   <section id="panel-historial" class="panel" role="tabpanel" aria-label="Historial de ventas">
     <div class="card">

@@ -4,17 +4,6 @@
  * SRP: orquesta el flujo entre servicios y vistas.
  */
 export class App {
-  /**
-   * @param {Object} p
-   * @param {import('./services/Services.js').ProductoService} p.productoService
-   * @param {import('./services/Services.js').VentaService}    p.ventaService
-   * @param {import('./ui/views/Views.js').CatalogoView}       p.catView
-   * @param {import('./ui/views/Views.js').VentaView}          p.ventaView
-   * @param {import('./ui/views/Views.js').HistorialView}      p.historialView
-   * @param {import('./ui/views/Views.js').StatsView}          p.statsView
-   * @param {import('./ui/components/Components.js').Toast}    p.toast
-   * @param {import('./ui/components/Components.js').ConfirmModal} p.modal
-   */
   constructor({ productoService, ventaService, catView, ventaView, historialView, statsView, toast, modal }) {
     this.productoService = productoService;
     this.ventaService    = ventaService;
@@ -83,13 +72,23 @@ export class App {
 
   /* ── Ventas ────────────────────────────────────────────────── */
   _bindVentaHandlers() {
+    this.ventaView.bindAgregarItem(() => this._onAgregarItem());
     this.ventaView.bindRegistrarVenta(() => this._onRegistrarVenta());
   }
 
+  _onAgregarItem() {
+    const item = this.ventaView.getItemData();
+    if (!item.producto) { this.toast.error('Selecciona un producto.'); return; }
+    if (item.precio <= 0) { this.toast.error('El precio debe ser mayor a cero.'); return; }
+    if (item.cantidad <= 0) { this.toast.error('La cantidad debe ser mayor a cero.'); return; }
+    this.ventaView.addItem(item);
+  }
+
   async _onRegistrarVenta() {
-    const data   = this.ventaView.getFormData();
-    const result = await this._withLoading('btn-registrar-venta', () =>
-      this.ventaService.registrar(data)
+    const cabecera = this.ventaView.getCabecera();
+    const items    = this.ventaView.getItems();
+    const result   = await this._withLoading('btn-registrar-venta', () =>
+      this.ventaService.registrar(cabecera, items)
     );
     if (!result.ok) { this.toast.error(result.errors.join(' ')); return; }
     this.toast.success('Venta registrada.');
@@ -140,17 +139,17 @@ export class App {
     const hoy   = new Date().toISOString().slice(0, 10);
     const desde = new Date();
     if (periodo === 'hoy')    return this._ventas.filter(v => v.fecha === hoy);
-    if (periodo === 'semana') { desde.setDate(desde.getDate() - 7); }
-    if (periodo === 'mes')    { desde.setDate(desde.getDate() - 30); }
+    if (periodo === 'semana') desde.setDate(desde.getDate() - 7);
+    if (periodo === 'mes')    desde.setDate(desde.getDate() - 30);
     const desdeStr = desde.toISOString().slice(0, 10);
     return this._ventas.filter(v => v.fecha >= desdeStr);
   }
 
-  async _onEliminarVenta(id) {
+  async _onEliminarVenta(ventaId) {
     const ok = await this.modal.ask('Eliminar venta', '¿Eliminar este registro de venta?');
     if (!ok) return;
     try {
-      await this.ventaService.eliminar(id);
+      await this.ventaService.eliminar(ventaId);
       this.toast.success('Venta eliminada.');
       await this._loadVentas();
     } catch { this.toast.error('Error eliminando la venta.'); }

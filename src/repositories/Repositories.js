@@ -32,7 +32,10 @@ export class VentaRepository extends BaseRepository {
     return todas.filter(v => v.fecha >= desde && v.fecha <= hasta);
   }
 
-  async deleteById(id) {
-    return this.api.get({ action: 'deleteVenta', id });
+  /**
+   * Elimina todas las filas que comparten el mismo ventaId.
+   */
+  async deleteByVentaId(ventaId) {
+    return this.api.get({ action: 'deleteVenta', id: ventaId });
   }
 }
