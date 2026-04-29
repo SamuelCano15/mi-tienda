@@ -209,6 +209,7 @@ export class HistorialView extends BaseView {
     const grupos = {};
     ventas.forEach(v => {
       if (!grupos[v.id]) grupos[v.id] = { ...v, items: [] };
+      else grupos[v.id].estado = v.estado || grupos[v.id].estado;
       grupos[v.id].items.push(v);
     });
 
