@@ -1,5 +1,7 @@
 import { FormHelper, BarChart } from '../components/Components.js';
 
+import { titleCase } from '../../utils.js';
+
 export class BaseView {
   constructor(panelId, deps = {}) {
     this.panel = document.getElementById(panelId);
@@ -28,8 +30,8 @@ export class CatalogoView extends BaseView {
     list.innerHTML = productos.map(p => `
       <div class="list-item" data-nombre="${p.nombre}">
         <div class="list-item__info">
-          <span class="list-item__title">${p.nombre}</span>
-          ${p.categoria ? `<span class="chip">${p.categoria}</span>` : ''}
+          <span class="list-item__title">${titleCase(p.nombre)}</span>
+          ${p.categoria ? `<span class="chip">${titleCase(p.categoria)}</span>` : ''}
         </div>
         <div class="list-item__actions">
           <span class="list-item__price">${p.precioFormateado}</span>
@@ -144,7 +146,7 @@ export class VentaView extends BaseView {
       ${this._items.map((item, idx) => `
         <div class="list-item">
           <div class="list-item__info">
-            <span class="list-item__title">${item.producto}</span>
+            <span class="list-item__title">${titleCase(item.producto)}</span>
             <span class="list-item__sub">${fmt(item.precio)} × ${item.cantidad}</span>
           </div>
           <div class="list-item__actions">
@@ -224,8 +226,8 @@ export class HistorialView extends BaseView {
         <div class="ticket-card">
           <div class="ticket-card__header">
             <div>
-              <span class="ticket-card__cliente">${g.cliente}
-                ${g.local ? `<span class="chip chip--local">${g.local}</span>` : ''}
+              <span class="ticket-card__cliente">${titleCase(g.cliente)}
+                ${g.local ? `<span class="chip chip--local">${titleCase(g.local)}</span>` : ''}
               </span>
               <div class="list-item__sub">${fmtFecha(g.fecha)}</div>
             </div>
@@ -236,7 +238,7 @@ export class HistorialView extends BaseView {
           <div class="ticket-card__items">
             ${g.items.map(i => `
               <div class="ticket-card__row">
-                <span>${i.producto} × ${i.cantidad}</span>
+                <span>${titleCase(i.producto)} × ${i.cantidad}</span>
                 <span>${fmt(i.total)}</span>
               </div>
             `).join('')}
