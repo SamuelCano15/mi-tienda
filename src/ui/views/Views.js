@@ -1,6 +1,6 @@
 import { FormHelper, BarChart } from '../components/Components.js';
-
 import { titleCase } from '../../utils.js';
+import { titleCase, calcComision } from '../../utils.js';
 
 export class BaseView {
   constructor(panelId, deps = {}) {
@@ -222,7 +222,7 @@ export class HistorialView extends BaseView {
 
     list.innerHTML = Object.values(grupos).map(g => {
       const totalGrupo = g.items.reduce((s, i) => s + i.total, 0);
-      const comision   = totalGrupo * 0.06;
+      const comision = calcComision(totalGrupo, g.estado);
       return `
         <div class="ticket-card">
           <div class="ticket-card__header">

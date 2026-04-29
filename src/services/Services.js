@@ -1,5 +1,6 @@
 import { Producto } from '../models/Producto.js';
 import { Venta }    from '../models/Venta.js';
+import { calcComision } from '../utils.js';
 
 export class ProductoService {
   constructor(repo) { this.repo = repo; }
@@ -71,7 +72,7 @@ async registrar(cabecera, items) {
     const porProducto   = this._agrupar(ventas, v => v.producto, v => v.cantidad);
     const porCliente    = this._agrupar(ventas, v => v.cliente, v => v.total);
     const porDia        = this._porDia(ventas, 14);
-    const totalComision = totalVendido * 0.06;
+    const totalComision = ventas.reduce((s, v) => s + calcComision(v.total, v.estado), 0);
     return { totalVendido, totalUnidades, clientes, hoyTotal, totalComision, porLocal, porProducto, porCliente, porDia };
   }
 
