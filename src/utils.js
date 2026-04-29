@@ -8,6 +8,3 @@
  */
 export const titleCase = str =>
   str ? str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : '';
-
-export const calcComision = (total, estado, rate = 0.06) =>
-  estado === 'Cancelado' ? 0 : total * rate;
