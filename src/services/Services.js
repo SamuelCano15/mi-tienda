@@ -28,7 +28,7 @@ export class VentaService {
    * @param {Object} cabecera - { fecha, cliente, local }
    * @param {Array}  items    - [{ producto, precio, cantidad, total }]
    */
-  async registrar(cabecera, items) {
+async registrar(cabecera, items) {
     if (!items.length) return { ok: false, errors: ['Agrega al menos un producto.'] };
     const errors = [];
     if (!cabecera.fecha)   errors.push('La fecha es obligatoria.');
@@ -40,7 +40,8 @@ export class VentaService {
       const venta = new Venta({
         ...cabecera,
         ...item,
-        id: ventaId,
+        id: ventaId,      // mismo id para todos
+        ventaId: ventaId, // se envía al Apps Script
       });
       await this.repo.save(venta);
     }

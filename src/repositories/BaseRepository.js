@@ -22,7 +22,8 @@ export class BaseRepository {
    * @returns {Promise<{ok: boolean}>}
    */
   async save(model) {
-    return this.api.get({ action: `add${this._cap()}`, ...model.toJSON() });
+    const data = model.toJSON();
+    return this.api.get({ action: `add${this._cap()}`, ...data, ventaId: data.id });
   }
 
   /**
